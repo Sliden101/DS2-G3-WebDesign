@@ -1,0 +1,200 @@
+<!--login-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - BookHaven</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+<div class="max-w-md w-full">
+    <!-- Logo -->
+    <div class="text-center mb-8">
+        <div class="flex items-center justify-center gap-2 mb-2">
+            <i class="fas fa-book text-blue-600 text-4xl"></i>
+            <span class="text-4xl font-bold text-gray-900">BookHaven</span>
+        </div>
+        <p class="text-gray-600">Welcome back! Please login to your account</p>
+    </div>
+
+    <!-- Login Form -->
+    <div class="bg-white rounded-2xl shadow-xl p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Sign In</h2>
+
+        <form id="loginForm" class="space-y-4">
+            <!-- Username -->
+            <div>
+                <label class="block text-gray-700 font-semibold mb-2">Username</label>
+                <div class="relative">
+                    <i class="fas fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input
+                            type="text"
+                            id="username"
+                            required
+                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition"
+                            placeholder="Enter your username">
+                </div>
+            </div>
+
+            <!-- Password -->
+            <div>
+                <label class="block text-gray-700 font-semibold mb-2">Password</label>
+                <div class="relative">
+                    <i class="fas fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input
+                            type="password"
+                            id="password"
+                            required
+                            class="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition"
+                            placeholder="Enter your password">
+                    <button type="button" onclick="togglePassword()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-eye" id="toggleIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Remember Me & Forgot Password -->
+            <div class="flex items-center justify-between">
+                <label class="flex items-center cursor-pointer">
+                    <input type="checkbox" class="mr-2 rounded">
+                    <span class="text-sm text-gray-600">Remember me</span>
+                </label>
+                <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-semibold">Forgot password?</a>
+            </div>
+
+            <!-- Error Message -->
+            <div id="errorMessage" class="hidden bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm">
+                <i class="fas fa-exclamation-circle mr-2"></i>
+                <span id="errorText"></span>
+            </div>
+
+            <!-- Login Button -->
+            <button
+                    type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition transform hover:scale-105 shadow-lg">
+                Sign In
+            </button>
+        </form>
+
+        <!-- Sign Up Link -->
+        <p class="text-center mt-6 text-gray-600">
+            Don't have an account?
+            <a href="./signup.html" class="text-blue-600 hover:text-blue-700 font-semibold">Sign Up</a>
+        </p>
+    </div>
+
+    <!-- Back to Home -->
+    <div class="text-center mt-6">
+        <a href="./index.html" class="text-gray-600 hover:text-gray-900 font-semibold">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Home
+        </a>
+    </div>
+</div>
+
+<script>
+    // Admin credentials
+    const admins = {
+        'sliden': 'TheWorstHumanBeing',
+        'reach': 'Fakeassnigga',
+        'vicheese': 'mnusakrub'
+    };
+
+    // Toggle password visibility
+    function togglePassword() {
+        const passwordInput = document.getElementById('password');
+        const toggleIcon = document.getElementById('toggleIcon');
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('fa-eye');
+            toggleIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('fa-eye-slash');
+            toggleIcon.classList.add('fa-eye');
+        }
+    }
+
+    // Show error message
+    function showError(message) {
+        const errorDiv = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+        errorText.textContent = message;
+        errorDiv.classList.remove('hidden');
+
+        setTimeout(() => {
+            errorDiv.classList.add('hidden');
+        }, 3000);
+    }
+
+    // Handle login form submission
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+
+        // Check if admin
+        if (admins[username]) {
+            if (admins[username] === password) {
+                // Store admin session
+                sessionStorage.setItem('userType', 'admin');
+                sessionStorage.setItem('username', username);
+                sessionStorage.setItem('isLoggedIn', 'true');
+
+                // Show success message
+                showSuccessAndRedirect('Admin login successful!', './admin-dashboard.html');
+            } else {
+                showError('Invalid password for admin account');
+            }
+        }
+        // Check if regular user (from localStorage - users who signed up)
+        else {
+            const storedUsers = JSON.parse(localStorage.getItem('bookhaven_users')) || [];
+            const foundUser = storedUsers.find(u => u.username === username);
+
+            if (foundUser) {
+                if (foundUser.password === password) {
+                    // Store user session
+                    sessionStorage.setItem('userType', 'user');
+                    sessionStorage.setItem('username', username);
+                    sessionStorage.setItem('isLoggedIn', 'true');
+
+                    // Show success message
+                    showSuccessAndRedirect('Login successful!', './index.html');
+                } else {
+                    showError('Invalid password');
+                }
+            } else {
+                showError('Username not found. Please sign up first.');
+            }
+        }
+    });
+
+    function showSuccessAndRedirect(message, url) {
+        const errorDiv = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+
+        errorDiv.classList.remove('hidden', 'bg-red-50', 'text-red-600');
+        errorDiv.classList.add('bg-green-50', 'text-green-600');
+        errorText.textContent = message;
+
+        setTimeout(() => {
+            window.location.href = url;
+        }, 1000);
+    }
+
+    // Check if already logged in
+    if (sessionStorage.getItem('isLoggedIn') === 'true') {
+        const userType = sessionStorage.getItem('userType');
+        if (userType === 'admin') {
+            window.location.href = './admin-dashboard.html';
+        } else {
+            window.location.href = './index.html';
+        }
+    }
+</script>
+</body>
+</html>
